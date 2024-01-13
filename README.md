@@ -41,11 +41,13 @@ x,0.1+x)), Min
 ```
 
 Render Object View
+
 ![object_wireframe_variants](./README.assets/object_wireframe_variants.webp)
 ![object_outcome](./README.assets/object_outcome.webp)
 ![object_coloring](./README.assets/object_coloring.webp)
 
 References
+
 ![object_references](./README.assets/object_references.webp)
 
 ## Disclaimer
