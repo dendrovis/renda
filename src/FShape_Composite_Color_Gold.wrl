@@ -1,0 +1,214 @@
+#VRML V2.0 utf8
+
+# The following EXTERNPROTO definitins remain the same for all FVRML scenes.
+
+EXTERNPROTO FGeometry [
+	exposedField SFString definition
+	exposedField MFFloat parameters
+	exposedField MFInt32 resolution
+	exposedField SFVec3f bboxCenter
+	exposedField SFVec3f bboxSize
+	exposedField SFString type
+	exposedField MFNode	parents
+	exposedField SFVec2f timeSpan
+] "http://www3.ntu.edu.sg/home/assourin/FVRML/FVRML.wrl#FGeometry"
+EXTERNPROTO FMaterial [
+	exposedField SFString diffuseColor
+	exposedField SFString type
+	exposedField MFColor patternColor
+	exposedField MFFloat patternKey
+	exposedField SFString ambientIntensity
+	exposedField SFString emissiveColor
+	exposedField SFString shininess
+	exposedField SFString specularColor
+	exposedField SFString transparency
+	exposedField MFFloat parameters
+	exposedField MFNode	parents
+	exposedField SFVec2f timeSpan
+] "http://www3.ntu.edu.sg/home/assourin/FVRML/FVRML.wrl#FMaterial"
+EXTERNPROTO FTexture3D [
+	exposedField SFString definition
+	exposedField SFString type
+	exposedField MFFloat parameters
+	exposedField MFNode	parents
+	exposedField SFVec2f timeSpan
+] "http://www3.ntu.edu.sg/home/assourin/FVRML/FVRML.wrl#FTexture3D"
+EXTERNPROTO FAppearance [
+	exposedField SFNode	material
+	exposedField SFNode	texture
+	exposedField SFNode	textureTransform
+	exposedField SFNode	texture3D
+	exposedField MFNode	parents
+	eventIn	SFBool refresh
+] "http://www3.ntu.edu.sg/home/assourin/FVRML/FVRML.wrl#FAppearance"
+EXTERNPROTO FShape [
+	exposedField SFNode	geometry
+	exposedField SFNode	appearance
+	exposedField SFString polygonizer
+	exposedField MFNode	parents
+	exposedField SFTime	startTime
+	exposedField SFTime stopTime
+    exposedField SFTime cycleInterval
+    exposedField SFBool	loop
+	exposedField SFBool	enabled
+	eventOut SFTime	cycleTime
+	eventIn SFFloat set_fraction
+	field SFInt32 frames
+] "http://www3.ntu.edu.sg/home/assourin/FVRML/FVRML.wrl#FShape"
+EXTERNPROTO FTransform [
+	exposedField SFString operation
+	exposedField SFString type
+	exposedField SFString polygonizer
+	exposedField MFFloat parameters
+	exposedField SFString center
+	exposedField SFString rotation
+	exposedField SFString scale
+	exposedField SFString scaleOrientation
+	exposedField SFString translation
+	exposedField MFNode children
+	exposedField MFNode	parents
+	eventIn	SFBool refresh
+    exposedField SFVec2f timeSpan
+	exposedField SFTime	startTime
+	exposedField SFTime stopTime
+    exposedField SFTime cycleInterval
+    exposedField SFBool	loop
+	exposedField SFBool	enabled
+	eventOut SFTime	cycleTime
+	eventIn SFFloat set_fraction
+	field SFInt32 frames
+] "http://www3.ntu.edu.sg/home/assourin/FVRML/FVRML.wrl#FTransform"
+
+Background {skyColor 1 1 1}
+
+# External VRML object "coordinate system" is included in the scene
+Inline {url "http://www3.ntu.edu.sg/home/assourin/FVRML/CoordinateAxes.wrl"}
+
+
+FShape {
+geometry FGeometry {
+
+# Function script defining the CSG solid. 
+# Change to some other formulae to see how the solid geometry changes 
+# based on the parameters domain and the sampling resolution defined below
+	definition "function frep(x,y,z,t){
+	
+	cylinderOpen = 1.5^2-(y)^2-(3+z)^2 ;
+	closeT     = 0.1-x;
+	closeB     = 0.1+x;   
+	closeRange   = min(closeT,closeB);
+	coin = min(cylinderOpen, closeRange);
+	
+	cylinderOpen = 1.6^2-(y)^2-(3+z)^2 ;
+	closeT     = 0.3-x;
+	closeB     = 0.3+x;   
+	closeRange   = min(closeT,closeB);
+	coin2 = min(cylinderOpen, closeRange);
+	
+	planeL=-z-2.6;
+	planeR=z+3.4;
+	planeT=0.4-y;
+	planeB=0.4+y;
+	planeLR = min(planeL,planeR);
+	planeTB = min(planeT, planeB);
+	squarehole =  min(planeLR, planeTB);
+	
+	
+	c1 = min(coin,-squarehole);
+	
+	cylinderOpen = 1.4^2-(y)^2-(3+z)^2 ;
+	c2 =  min(coin2,-cylinderOpen);
+	
+	c3 = max(c2,c1);
+	
+	planeL=-z-2.5;
+	planeR=z+3.5;
+	planeT=0.5-y;
+	planeB=0.5+y;
+	planeF=0.2-x;
+	planeBa=0.2+x;
+	planeLR = min(planeL,planeR);
+	planeTB = min(planeT, planeB);
+	planeFB = min(planeF, planeBa);
+	squareRange =  min(planeLR, planeTB);
+	squareEdge = min(squareRange,planeFB);
+	
+	c4 = min(squareEdge,-squarehole);
+	
+	coinFinal = max(c3,c4);
+	
+	
+	ellipsoid = 1^2-(x/0.5)^2 - (y/0.5)^2 - (z+0.7)^2;
+	
+	Sphere = 1^2-(x)^2 - (y)^2 - (z-0.5)^2 ;
+	Cone2 = (x)^2 + (y)^2 -(((z)*0.5)+0.7)^2 ;
+	closeTop     = z;
+	closeBtm     = 4-z;   
+	closeRange   = min(closeBtm,closeTop);
+	Cone        = min(closeRange, -Cone2);
+	Ceil        = max(Sphere,Cone);
+	
+	
+	c5 = max(coinFinal, ellipsoid);
+	
+	
+	
+	
+	c6 = max(c5,Ceil);
+	
+	
+	InSphere = 5^2-(x)^2 - (y)^2 - (z-8.5)^2 ;
+	cut_off1 = -z+6;
+	cut_off2 = z - 8;
+	cut_offt = min(cut_off1,cut_off2);
+	InSphere_C = min(cut_off1,InSphere);
+	
+	c7 = max(c6,InSphere_C);
+	
+	InnSphere = 4.2^2-(x)^2 - (y)^2 - (z-7)^2 ;
+	cut_off1 = -z+6;
+	InnSphere_C = min(cut_off1,InnSphere);
+	
+	c8 = max(c7,InnSphere_C);
+	
+	
+	ConeIn = (x)^2 + (y)^2 -(((z-1)*0.6)+0.7)^2 ;
+	closeTop     = z;
+	closeBtm     = 7-z;   
+	closeRange   = min(closeBtm,closeTop);
+	ConeInn        = min(closeRange, -ConeIn);
+	
+	c9 = min(c8,-ConeInn);
+	
+	Bell = 1.5^2-(x)^2 - (y)^2 - (z-6)^2 ;
+	
+	c10 = max(c9,Bell);
+	
+	
+	cylinderOpenIn = 0.2^2-x^2-y^2;
+	closeTop     = z;
+	closeBtm     = 6-z;   
+	closeRange   = min(closeTop,closeBtm);
+	CylinderIn        = min(cylinderOpenIn, closeRange);
+	
+	final = max(CylinderIn, c10);
+	
+	
+	
+	
+	
+	return final;}"
+
+# Adjust the tight bounding box and an optimal resolution   
+bboxCenter 0 0 0
+bboxSize 20 20 20
+resolution [150 150 150]
+
+ }     
+
+appearance FAppearance {
+material FMaterial { 
+# Variable color is defined for the CGS solid
+diffuseColor "r=0.902; g=0.6824; b=0.1451;"
+   }    }
+}
